@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile with role management and tracking.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identifier of the user matching request.auth.uid" },
+        "email": { "type": "string", "format": "email", "description": "Email address of the user" },
+        "displayName": { "type": "string", "description": "Display name" },
+        "photoURL": { "type": "string", "description": "Avatar image URL" },
+        "role": { "type": "string", "enum": ["admin", "creator", "user"], "description": "User permissions tier" },
+        "subscribedCreators": { "type": "array", "description": "Creator UIDs this user is subscribed to" },
+        "subscribersCount": { "type": "number", "description": "Number of subscribers if the user is a creator" },
+        "favorites": { "type": "array", "description": "IDs of favorited videos" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Profile creation timestamp" }
+      },
+      "required": ["uid", "email", "displayName", "photoURL", "role", "createdAt"]
+    },
+    "Video": {
+      "title": "Video Details",
+      "description": "Video upload details, statistics, and classification metadata.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Video unique identifier" },
+        "title": { "type": "string", "description": "Video display title" },
+        "description": { "type": "string", "description": "Video narration descriptive content" },
+        "videoUrl": { "type": "string", "format": "uri", "description": "Source video file location" },
+        "thumbnailUrl": { "type": "string", "format": "uri", "description": "Thumbnail preview location" },
+        "category": { "type": "string", "description": "Main category classification" },
+        "creatorId": { "type": "string", "description": "UID of the uploading creator account" },
+        "creatorName": { "type": "string", "description": "Creator profile display name" },
+        "creatorPhoto": { "type": "string", "description": "Creator current avatar image" },
+        "views": { "type": "number", "description": "Total view actions counted" },
+        "likes": { "type": "array", "description": "UID collection representing user likes" },
+        "dislikes": { "type": "array", "description": "UID collection representing user dislikes" },
+        "downloadsCount": { "type": "number", "description": "Total download occurrences" },
+        "isPremium": { "type": "boolean", "description": "Requires active premium subscription tier" },
+        "duration": { "type": "string", "description": "Duration text e.g. 5:20" },
+        "hasAds": { "type": "boolean", "description": "Triggers pre-roll/mid-roll ad sequences" },
+        "approved": { "type": "boolean", "description": "Moderator administrative approval tag" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "description": "Administrative audit state" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Upload completion timestamp" },
+        "qualityOptions": { "type": "array", "description": "Supported resolution files standard list" }
+      },
+      "required": ["id", "title", "description", "videoUrl", "thumbnailUrl", "category", "creatorId", "views", "likes", "dislikes", "isPremium", "approved", "status", "createdAt"]
+    },
+    "Comment": {
+      "title": "Video Comment",
+      "description": "User conversations and feedback recorded on videos.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique comment identifier" },
+        "videoId": { "type": "string", "description": "Reference target video identifier" },
+        "userId": { "type": "string", "description": "Author user identifier" },
+        "userName": { "type": "string", "description": "Author display name" },
+        "userPhoto": { "type": "string", "description": "Author avatar photo" },
+        "text": { "type": "string", "description": "Literal speech text statement body" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Publish moment" }
+      },
+      "required": ["id", "videoId", "userId", "userName", "text", "createdAt"]
+    },
+    "Donation": {
+      "title": "Creator Tip & Donation",
+      "description": "Financial patronage records transferred from users to creators.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique donation payment ID" },
+        "creatorId": { "type": "string", "description": "UID of the creator receiving patronage" },
+        "creatorName": { "type": "string", "description": "Creator screen name" },
+        "donorName": { "type": "string", "description": "Donor billing name" },
+        "amount": { "type": "number", "description": "Fiat amount" },
+        "message": { "type": "string", "description": "Accompanying support message" },
+        "paymentMethod": { "type": "string", "enum": ["stripe", "paypal"], "description": "Payment processor utilized" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Payment confirmation moment" }
+      },
+      "required": ["id", "creatorId", "amount", "paymentMethod", "createdAt"]
+    },
+    "WatchHistory": {
+      "title": "User Watch History Node",
+      "description": "Individual watched tracking record.",
+      "type": "object",
+      "properties": {
+        "videoId": { "type": "string", "description": "The watched video ID" },
+        "watchedAt": { "type": "string", "format": "date-time", "description": "Interactive time logged" },
+        "progress": { "type": "number", "description": "Progress in seconds" }
+      },
+       "required": ["videoId", "watchedAt", "progress"]
+    },
+    "Admin": {
+      "title": "Admin Role Anchor",
+      "description": "Whitelist document indicating global administrator privilege.",
+      "type": "object",
+      "properties": {
+         "uid": { "type": "string", "description": "Admin system UID reference" },
+         "email": { "type": "string", "description": "Registered email" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user registration profiles and states."
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Security whitelist specifying authorized platform admins."
+    },
+    "/videos/{videoId}": {
+      "schema": "Video",
+      "description": "Platform catalog for live and pending motion picture streams."
+    },
+    "/videos/{videoId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Conversational threads tied to individual assets."
+    },
+    "/donations/{donationId}": {
+      "schema": "Donation",
+      "description": "Independent transaction ledger tracking direct payments."
+    },
+    "/users/{userId}/watchHistory/{historyId}": {
+      "schema": "WatchHistory",
+      "description": "Individual tracker for last watched playhead locations."
+    }
+  }
+}
